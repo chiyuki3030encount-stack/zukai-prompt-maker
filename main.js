@@ -38,74 +38,87 @@ document.addEventListener('DOMContentLoaded', () => {
     const promptOutput = document.getElementById('promptOutput');
     const copyNotice = document.getElementById('copyNotice');
 
-    // Wafuu Details Mapping
-    const wafuuDetails = {
-        '和風：基本（日本画風・和紙・藍と金）': '日本画のような雰囲気で、和紙の質感、藍色を基調に、控えめな金のアクセント。',
-        '和風：柔らかい（和モダン・和紙・くすみ色）': '日本画のような柔らかい色彩、和紙の質感、くすみ色中心の落ち着いた和モダン。',
-        '和風：神聖（水墨画・墨と金・余白）': '水墨画のような静けさ、墨と金を基調に、余白を活かした和の構図。',
-        '和風：華やか（屏風絵・朱と藍・金箔）': '屏風絵のような装飾性、金箔のアクセント、朱と藍のコントラスト。',
-        '和風：可愛い（ちりめん・淡い和色・和柄）': 'ちりめんのような柔らかい質感、淡い和色、和柄モチーフ。'
-    };
-
     generateBtn.addEventListener('click', () => {
         const title = document.getElementById('title').value;
         const layout = document.getElementById('layout').value;
         const ratio = document.getElementById('ratio').value;
         const customLayout = document.getElementById('customLayout').value;
-        const tasteValue = document.getElementById('taste').value;
+        const taste = document.getElementById('taste').value;
         const colorPattern = document.getElementById('colorPattern').value;
-        const mainColor = document.getElementById('mainColor').value || '指定なし（配色パターンに合わせて最適化）';
+        const mainColor = document.getElementById('mainColor').value;
         const texture = document.getElementById('texture').value;
-        const character = document.getElementById('character').value || 'なし（キャラ無しで構成）';
+        const character = document.getElementById('character').value;
         const content = document.getElementById('content').value;
-        const additional = document.getElementById('additional').value || 'なし';
+        const additional = document.getElementById('additional').value;
+        const infoStyle = document.getElementById('infoStyle').value;
 
-        // Process Wafuu taste
-        let tasteOutput = tasteValue;
-        if (wafuuDetails[tasteValue]) {
-            tasteOutput = wafuuDetails[tasteValue];
+        let styleDetail = "";
+        if (taste.includes("和風")) {
+            if (taste.includes("基本")) {
+                styleDetail = "日本画風の繊細なタッチ、和紙のテクスチャ、藍色と金のアクセントを使い、伝統的かつ高級感のある和風デザインにしてください。";
+            } else if (taste.includes("柔らかい")) {
+                styleDetail = "現代的な和モダン、淡い「くすみカラー」、透け感のある和紙の質感、ミニマルで柔らかなレイアウトにしてください。";
+            } else if (taste.includes("神聖")) {
+                styleDetail = "水墨画のような墨の濃淡、鋭い筆跡、背景に広大な余白を活かし、アクセントとして金箔のような輝きを加えてください。";
+            } else if (taste.includes("華やか")) {
+                styleDetail = "豪華な金屏風絵のような雰囲気、朱色や群青色の強いコントラスト、金箔の装飾、細部まで描き込まれた優雅な装飾を施してください。";
+            } else if (taste.includes("可愛い")) {
+                styleDetail = "ちりめん細工のような質感、パステル調の和色（桃色、鶸色など）、小さな和柄（麻の葉、七宝など）を散りばめた愛らしいデザインにしてください。";
+            }
+        } else if (taste.includes("漫画風")) {
+            styleDetail = "日本の漫画（コミック）調のデザイン。太い輪郭線、強調線、トーン、キャッチーなフォント、躍動感のある構図にしてください。";
+        } else if (taste.includes("サイバー")) {
+            styleDetail = "近未来的、ダークな背景に鮮やかなネオン光（ブルー、ピンク等）、グリッド線、ホログラム効果、ハイテクな電子回路をイメージした質感にしてください。";
+        } else if (taste.includes("高級感")) {
+            styleDetail = "上品でラグジュアリーなデザイン。洗練された配色（ゴールド、モノトーン、深い紺など）、高精細な質感、余裕のあるレイアウト、極めて高品質な表現にしてください。";
+        } else if (taste.includes("こどもの絵本風")) {
+            styleDetail = "クレヨンや色鉛筆で描いたような温かいタッチ。塗りムラやガタガタした線、素朴なキャラクター、優しく親しみやすい色彩と手描き感を重視してください。";
+        } else if (taste.includes("水彩絵手紙風")) {
+            styleDetail = "透明感のある水彩絵の具の「にじみ」や筆跡。柔らかいグラデーション、墨による味のある文字・輪郭線、季節感を感じる情緒的な雰囲気にしてください。";
         }
 
-        const prompt = `あなたはプロのインフォグラフィックデザイナー兼イラストレーターです。
-以下の指定に従い、SNS（Xなど）で投稿しやすい「読みやすい縦長図解」を作成してください。
+        // Info Style logic
+        let infoStyleInstruction = "";
+        if (infoStyle.includes("テキスト重視")) {
+            infoStyleInstruction = "【情報伝達ルール：テキスト重視】要点を的確に伝えるため、適切な文字量を含めてください。各セクションに読みやすい要約文を配置し、理解を助ける構成にしてください。";
+        } else {
+            infoStyleInstruction = "【情報伝達ルール：アイコン・イラスト重視】文字による説明を最小限（キーワード程度）に抑え、アイコン、記号、ピクトグラム、イラストを多用して視認性高く情報を伝えてください。";
+        }
 
-${title ? `# 図解タイトル\n${title}\n` : ''}
-# ① 図解の型
-- 指定：${layout}
-- 自由指定（あれば優先）：${customLayout || 'なし'}
+        const prompt = `
+# 縦長インフォグラフィック生成プロンプト (V4.2)
 
-# ⑧ 図解の形（比率）
-- 指定：${ratio}
-- 自由指定（あれば優先）：なし
+あなたはプロのデザイナーです。以下の詳細な指示に従い、最高品質の図解画像を生成してください。
 
-# ② 図解のテイスト
-- ${tasteOutput}
+## 1. 全体のコンセプト
+- **タイトル**: ${title || "指定なし"}
+- **基本テイスト**: ${taste}
+- **レイアウトの型**: ${layout}
+- **画面比率**: ${ratio}
 
-# ③ 配色パターン
-- ${colorPattern}
+## 2. デザイン・ディテール
+- **スタイルの詳細**: ${styleDetail}
+- **配色パターン**: ${colorPattern}
+- **メインカラー**: ${mainColor || "テイストに合わせて最適化"}
+- **質感 (テクスチャ)**: ${texture}
+- **${infoStyleInstruction}**
 
-# ④ メインカラー
-- ${mainColor}
+## 3. キャラクター設定 (任意)
+- **キャラクター詳細**: ${character || "なし"}
 
-# ⑤ 質感
-- ${texture}
+## 4. 図解の内容 (インプット)
+${customLayout ? `### レイアウトの自由指定:\n${customLayout}\n\n` : ""}
+### 構成データ:
+${content || "（具体的な内容が入力されていません。AI側で一般的な内容で構成してください）"}
 
-# ⑥ キャラの指定（任意）
-- ${character}
+## 5. 追加の指示
+- **詳細指示**: ${additional || "特になし"}
 
-# ⑦ 図解のデータ（内容）
-${content || '（図解化したい内容を入力してください）'}
-
-# 追加の指示（任意）
-${additional}
-
-# 生成ルール
-1. 視認性最優先：文字は読みやすいサイズ、詰め込みすぎない。
-2. 情報は適切に要約し、見出し→要点の構造で整理する。
-3. 図解の型（レイアウト）の意図を崩さない。
-4. 配色は指定の雰囲気とメインカラーに揃え、統一感を出す。
-5. キャラを入れる場合、邪魔にならないサイズで各セクションに自然に配置する。
-6. 仕上がりは1枚の完成画像として、装飾（アイコン/罫線/矢印など）で理解を助ける。`;
+## 6. 生成ルール (厳守)
+- 指示された比率 (${ratio}) を厳守すること。
+- テキストは日本語を基本とし、読みやすさを最優先する。
+- 画面端まで美しくデザインを配置し、高品質なグラフィックに仕上げる。
+`;
 
         promptOutput.textContent = prompt;
         // Scroll to output
