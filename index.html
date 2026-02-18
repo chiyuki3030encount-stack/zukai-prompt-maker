@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>図解プロンプトメーカー 改良版</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Password Gate -->
+    <div id="passwordGate" class="password-gate">
+        <div class="password-box">
+            <h2>図解プロンプトメーカー</h2>
+            <p>アクセスするにはパスワードを入力してください</p>
+            <input type="password" id="passwordInput" placeholder="パスワード">
+            <button id="loginBtn">認証する</button>
+            <p id="passwordError" class="error-msg" style="display: none;">パスワードが正しくありません</p>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer" style="display: none;">
+        <header>
+            <h1>図解プロンプトメーカー</h1>
+            <p>Nano Banana Pro (Gemini 3) 用の図解プロンプトを簡単に作成</p>
+        </header>
+
+        <main class="main-card">
+            <div class="form-grid">
+                <!-- Title -->
+                <div class="form-group full-width">
+                    <label for="title">図解タイトル (任意)</label>
+                    <input type="text" id="title" placeholder="例：NanobananaProで図解を作る8つのコツ">
+                </div>
+
+                <!-- Layout Type -->
+                <div class="form-group">
+                    <label for="layout">① 図解の型 (レイアウト)</label>
+                    <select id="layout">
+                        <option value="タイル型（要点をカードで並べる）">タイル型（カード並列）</option>
+                        <option value="フローチャート型（手順を追う）">フローチャート型</option>
+                        <option value="比較型（左右で対比させる）">比較型（A vs B）</option>
+                        <option value="ステップ型（プロセス・手順）">ステップ型（手順解説）</option>
+                        <option value="タイムライン型（時系列）">タイムライン型（歴史・ロードマップ）</option>
+                        <option value="リスト型（重要なポイントの列挙）">リスト型（箇条書き）</option>
+                        <option value="中心図解型（中央にメイン画像を配置）">中心図解型（セントラル・ビジュアル）</option>
+                        <option value="ピラミッド型（階層構造）">ピラミッド型</option>
+                        <option value="統計型（データ・グラフ中心）">統計型（インフォグラフィック）</option>
+                        <option value="マインドマップ型（中心から広がる）">マインドマップ型</option>
+                        <option value="なし">なし（AIにお任せ）</option>
+                    </select>
+                </div>
+
+                <!-- Ratio -->
+                <div class="form-group">
+                    <label for="ratio">⑧ 図解の形 (比率)</label>
+                    <select id="ratio">
+                        <option value="4:5（縦長・SNS向け推奨）" selected>4:5（縦長・SNS向け推奨）</option>
+                        <option value="1:1（正方形）">1:1（正方形）</option>
+                        <option value="16:9（横長）">16:9（横長）</option>
+                        <option value="9:16（リール・ストーリー用）">9:16（リール・ストーリー用）</option>
+                    </select>
+                </div>
+
+                <!-- Free Input for Layout/Ratio -->
+                <div class="form-group full-width">
+                    <label for="customLayout">型/比率の自由指定 (必要なときだけ)</label>
+                    <textarea id="customLayout"
+                        placeholder="例：タイル型。上に大見出し、下に2列×4段の計8カード。各カードに見出し＋短文＋小アイコン。比率4:5。"></textarea>
+                </div>
+
+                <!-- Taste -->
+                <div class="form-group">
+                    <label for="taste">② 図解のテイスト (画風)</label>
+                    <select id="taste">
+                        <option value="手書き風（太めの線・柔らかい表現）">手書き風（太めの線・柔らかい表現）</option>
+                        <option value="フラットデザイン（シンプル・モダン）">フラットデザイン（シンプル・モダン）</option>
+                        <option value="3Dイラスト（立体的・ポップ）">3Dイラスト（立体的・ポップ）</option>
+                        <option value="漫画風（コミック調・強調線・キャッチー）">漫画風（コミック調）</option>
+                        <option value="サイバー（近未来的・ネオン・ハイテク）">サイバー（近未来）</option>
+                        <option value="高級感（上品・ラグジュアリー・洗練）">高級感（上品・高級）</option>
+                        <option value="こどもの絵本風（クレヨン・色鉛筆・素朴で温かい・手描き感）">こどもの絵本風（クレヨン・色鉛筆）</option>
+                        <option value="水彩絵手紙風（にじみ・筆跡・季節感・柔らかい色彩）">水彩絵手紙風</option>
+                        <option value="レトロ・ビンテージ（古紙風・落ち着いた色合い）">レトロ・ビンテージ（古紙風）</option>
+                        <option disabled>──────────</option>
+                        <option value="和風：基本（日本画風・和紙・藍と金）">和風：基本（藍と金のアクセント）</option>
+                        <option value="和風：柔らかい（和モダン・和紙・くすみ色）">和風：柔らかい（和モダン）</option>
+                        <option value="和風：神聖（水墨画・墨と金・余白）">和風：神聖（水墨画風）</option>
+                        <option value="和風：華やか（屏風絵・朱と藍・金箔）">和風：華やか（屏風絵風）</option>
+                        <option value="和風：可愛い（ちりめん・淡い和色・和柄）">和風：可愛い（ちりめん風）</option>
+                    </select>
+                </div>
+
+                <!-- Color Pattern -->
+                <div class="form-group">
+                    <label for="colorPattern">③ 配色パターン (雰囲気)</label>
+                    <select id="colorPattern">
+                        <option value="ポップ（明るい・元気）">ポップ（明るい・元気）</option>
+                        <option value="ビジネス（信頼・誠実・青系）">ビジネス（信頼・誠実）</option>
+                        <option value="ナチュラル（自然・癒やし・緑系）">ナチュラル（自然・癒やし）</option>
+                        <option value="高級感（ゴールド・黒・洗練）">高級感（ゴールド・黒）</option>
+                        <option value="パステル（バランスの良い配色・ブルーグレー系）">パステル（バランスの良い配色）</option>
+                        <option value="指定なし（テイストに合わせて最適化）" selected>指定なし</option>
+                    </select>
+                </div>
+
+                <!-- Main Color -->
+                <div class="form-group">
+                    <label for="mainColor">④ メインカラー</label>
+                    <input type="text" id="mainColor" placeholder="例：イエロー / ブルー / #FFD400 など">
+                </div>
+
+                <!-- Texture -->
+                <div class="form-group">
+                    <label for="texture">⑤ 質感</label>
+                    <select id="texture">
+                        <option value="紙っぽい（ざらつき・温かい）">紙っぽい（ざらつき・温かい）</option>
+                        <option value="光沢（つるつる・デジタル）">光沢（つるつる・デジタル）</option>
+                        <option value="メタリック（金属質・硬質）">メタリック（金属質）</option>
+                        <option value="ガラス（透明感・反射・洗練）">ガラス（透明感・ガラス）</option>
+                        <option value="ネオン（発光・グロー・夜景風）">ネオン（発光・グロー）</option>
+                        <option value="マット（反射を抑えた・上品）">マット（反射を抑えた）</option>
+                        <option value="なし">なし</option>
+                    </select>
+                </div>
+
+                <!-- Character -->
+                <div class="form-group full-width">
+                    <label for="character">⑥ キャラの指定 (任意)</label>
+                    <textarea id="character" placeholder="例：白髪のデフォルメキャラ。黒い服。表情は明るい。図解の各セクションに小さく登場。"></textarea>
+                </div>
+
+                <!-- Character Ref Image -->
+                <div class="form-group full-width">
+                    <label>キャラクター参照画像 (任意)</label>
+                    <div class="file-upload-wrapper">
+                        <label for="charImg" class="file-upload-btn">ファイルを共有（※生成はAI側で行います）</label>
+                        <input type="file" id="charImg" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Data Content -->
+                <div class="form-group full-width">
+                    <label for="content">⑦ 図解のデータ (内容)</label>
+                    <textarea id="content" placeholder="文章やURLでもOK。例：図解にしたい内容を貼る / 記事URLを貼る など"></textarea>
+                </div>
+
+                <!-- Additional Instructions -->
+                <div class="form-group full-width">
+                    <label for="additional">追加の指示 (任意：アイコン、文字量、余白など)</label>
+                    <textarea id="additional" placeholder="例：文字は少なめ、要点を太字っぽく見せたい。小アイコンを使う。スマホで読める大きさ。"></textarea>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="generateBtn" class="primary-btn">プロンプトを生成</button>
+                <button id="copyBtn" class="secondary-btn">COPY</button>
+                <button id="resetBtn" class="reset-btn">リセット</button>
+            </div>
+        </main>
+
+        <section class="output-container">
+            <h3>生成されたプロンプト</h3>
+            <div id="promptOutput" class="prompt-area">ここにプロンプトが生成されます...</div>
+        </section>
+    </div>
+
+    <div id="copyNotice" class="copy-notice">コピーしました！</div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
